@@ -285,6 +285,11 @@ function renderWinnerOdds({ teams, h2h, favorites }) {
 }
 
 function renderMarket(snapshot, spread) {
+  const isDerived = snapshot.market_id === "winner_odds_derived";
+  // Update Polymarket column sublabel
+  const lbl = document.querySelector("#polymarket-col .prob-col-label, .prob-col:nth-child(3) .prob-col-label");
+  if (lbl) lbl.textContent = isDerived ? "Polymarket (H2H)" : "Polymarket";
+
   const swarmPct  = parseFloat(document.getElementById("consensus-p")?.textContent) || 0;
   const mPct      = (snapshot.market_probability * 100).toFixed(1);
   const spreadPp  = (spread * 100).toFixed(1);
@@ -368,6 +373,20 @@ function handleEvent(msg) {
       break;
     case "market_check":
       if (msg.payload.snapshot) renderMarket(msg.payload.snapshot, msg.payload.spread);
+      break;
+    case "winner_odds":
+      // Fallback: populate Polymarket column from tournament H2H if no match market
+      if (!document.getElementById("market-p-inline")?.textContent.match(/\d/)) {
+        const h2h = msg.payload.h2h;
+        const team = teamAName();
+        const p = h2h?.[team];
+        if (p != null) {
+          const pct = (p * 100).toFixed(1);
+          const swarmPct = parseFloat(document.getElementById("consensus-p")?.textContent) || 0;
+          const spread = Math.abs(swarmPct / 100 - p);
+          renderMarket({ market_probability: p, market_id: "winner_odds_derived" }, spread);
+        }
+      }
       break;
     case "edge_result":
       renderEdge(msg.payload.edge_detected, msg.payload.bet_receipt);

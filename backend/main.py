@@ -15,7 +15,7 @@ from .agents.delphi import synthesize_verdict
 from .config import settings
 from .data.wc26 import build_context_bundle, get_groups_data
 from .market.edge import detect_and_act
-from .market.gamma import find_wc_market, fetch_winner_odds, fetch_top_wc_favorites, get_match_markets
+from .market.gamma import find_wc_market, fetch_winner_odds, fetch_winner_odds, fetch_top_wc_favorites, get_match_markets
 from .observability import weave_tracer
 from .schemas import ForecastResult, WSEventType, WSMessage
 from .eval.router import router as eval_router
@@ -72,14 +72,36 @@ def run_market_validation(
     team_b: str,
     polymarket_market_id: str,
 ):
+    """Try match market first, fall back to winner-odds derived H2H probability."""
     try:
         market_id = polymarket_market_id or find_wc_market(team_a, team_b) or ""
-        if not market_id:
-            return None, None, False, None
-        return detect_and_act(consensus_probability, market_id)
+        if market_id:
+            return detect_and_act(consensus_probability, market_id)
     except Exception as exc:
-        print(f"[market] validation skipped: {exc}")
-        return None, None, False, None
+        print(f"[market] match market skipped: {exc}")
+
+    # Fallback: derive head-to-head probability from Polymarket tournament winner odds
+    try:
+        odds = fetch_winner_odds(team_a, team_b)
+        p_a = odds.get(team_a, odds.get(list(odds.keys())[0] if odds else team_a))
+        p_b = odds.get(team_b, odds.get(list(odds.keys())[-1] if odds else team_b))
+        if p_a and p_b:
+            total = p_a.market_probability + p_b.market_probability
+            if total > 0:
+                from .schemas import MarketSnapshot
+                h2h_p = p_a.market_probability / total
+                spread = abs(consensus_probability - h2h_p)
+                snapshot = MarketSnapshot(
+                    market_id="winner_odds_derived",
+                    market_probability=round(h2h_p, 4),
+                    volume_24h=None,
+                    open_interest=None,
+                )
+                return snapshot, spread, spread > 0.08, None
+    except Exception as exc:
+        print(f"[market] winner odds fallback skipped: {exc}")
+
+    return None, None, False, None
 
 
 @weave.op()
@@ -149,15 +171,15 @@ async def run_forecast_pipeline(req: ForecastRequest) -> ForecastResult:
         req.team_b,
         req.polymarket_market_id,
     )
-    if snapshot is not None or edge_detected:
-        await emit(WSEventType.market_check, {
-            "snapshot": snapshot.model_dump() if snapshot else None,
-            "spread": spread,
-        })
-        await emit(WSEventType.edge_result, {
-            "edge_detected": edge_detected,
-            "bet_receipt": bet_receipt.model_dump() if bet_receipt else None,
-        })
+    # Always emit so the frontend always gets a market probability
+    await emit(WSEventType.market_check, {
+        "snapshot": snapshot.model_dump() if snapshot else None,
+        "spread": spread,
+    })
+    await emit(WSEventType.edge_result, {
+        "edge_detected": edge_detected,
+        "bet_receipt": bet_receipt.model_dump() if bet_receipt else None,
+    })
 
     forecast.market = snapshot
     forecast.spread = spread
