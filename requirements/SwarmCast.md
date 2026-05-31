@@ -8,6 +8,22 @@
 
 ---
 
+## 0. Forecast Question
+
+```python
+MATCH_HOME = "<home team>"
+MATCH_AWAY = "<away team>"
+
+QUESTION = (
+    f"Predict the final score for {MATCH_HOME} vs {MATCH_AWAY} in a World Cup match. "
+    "Provide goals for each team and a confidence score between 0.0 and 1.0."
+)
+```
+
+The `QUESTION` string is the single input to the pipeline. The meta-orchestrator receives it verbatim and uses it to spawn the specialist pool. All agent prompts are derived from this question — no other match context is pre-injected by the caller.
+
+---
+
 ## 1. The Core Idea
 
 SwarmCast is a multi-agent deliberation system for World Cup match forecasting. A meta-orchestrator reads the match and spawns a pool of specialist agents — each with a narrow analytical lens and a scoped data slice. Agents deliberate in parallel without seeing each other's outputs. A holistic critic reads the full panel as a unified picture and identifies what the collective intelligence is missing. A Delphi voting round gives specialists one revision pass. A confidence-weighted consensus probability emerges.
