@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SwarmCast</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>SwarmCast</h1>
+    <p class="tagline">Multi-agent swarm · World Cup forecasting · Polymarket edge detection</p>
+  </header>
+
+  <main>
+    <!-- Match input -->
+    <section id="input-panel">
+      <form id="forecast-form">
+        <div class="field-row">
+          <input id="team-a"    type="text"   placeholder="Team A (e.g. Brazil)"   required />
+          <span class="vs">vs</span>
+          <input id="team-b"    type="text"   placeholder="Team B (e.g. France)"    required />
+        </div>
+        <div class="field-row secondary">
+          <input id="team-a-id"        type="number" placeholder="Team A ID (football-data.org)" />
+          <input id="team-b-id"        type="number" placeholder="Team B ID" />
+          <input id="competition-id"   type="text"   placeholder="Competition ID (e.g. WC2026)" />
+          <input id="market-id"        type="text"   placeholder="Polymarket market ID (optional)" />
+        </div>
+        <button type="submit" id="run-btn">Run SwarmCast</button>
+      </form>
+    </section>
+
+    <!-- Boids visualization -->
+    <section id="viz-panel">
+      <div id="boids-container">
+        <!-- p5.js sketch mounts here -->
+      </div>
+      <div id="phase-label">Waiting for match...</div>
+    </section>
+
+    <!-- Live agent feed -->
+    <section id="agent-feed">
+      <h2>Agent Panel</h2>
+      <div id="agent-cards"></div>
+    </section>
+
+    <!-- Critic output -->
+    <section id="critic-panel" class="hidden">
+      <h2>Holistic Critic</h2>
+      <div id="critic-gaps"></div>
+      <div id="critic-groupthink"></div>
+      <div id="critic-actions"></div>
+    </section>
+
+    <!-- Consensus + market -->
+    <section id="result-panel" class="hidden">
+      <h2>Consensus</h2>
+      <div id="consensus-display">
+        <span id="consensus-p" class="big-number">—</span>
+        <span id="consensus-ci" class="ci-label"></span>
+      </div>
+
+      <div id="market-display" class="hidden">
+        <h3>Market</h3>
+        <span id="market-p" class="big-number">—</span>
+        <span id="spread-label"></span>
+      </div>
+
+      <div id="edge-display" class="hidden">
+        <div id="edge-badge"></div>
+        <pre id="bet-receipt"></pre>
+      </div>
+
+      <!-- Fallback bar chart (shown if Boids not ready) -->
+      <div id="bar-chart">
+        <h3>Agent Votes</h3>
+        <div id="bars"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js"></script>
+  <script src="/static/sketch.js"></script>
+  <script src="/static/ws.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.egg
+
+# Env
+.env
+.env.local
+
+# Data (large files — embed offline, never commit)
+backend/data/static/
+backend/data/embeddings/
+*.npy
+*.sqlite
+*.db
+
+# Weave / W&B
+wandb/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
