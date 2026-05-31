@@ -101,16 +101,42 @@ function renderCritique(critique) {
 
 function renderConsensus(consensus) {
   show("result-panel");
-  setText("consensus-p", `${(consensus.probability * 100).toFixed(1)}%`);
-  setText("consensus-ci",
-    `P(${teamAName()} wins) · 80% CI [${(consensus.ci_low * 100).toFixed(1)}%, ${(consensus.ci_high * 100).toFixed(1)}%]`
+  const team   = teamAName();
+  const pct    = (consensus.probability * 100).toFixed(1);
+  const lo     = (consensus.ci_low  * 100).toFixed(1);
+  const hi     = (consensus.ci_high * 100).toFixed(1);
+  const agents = consensus.all_votes?.length ?? "the";
+  const dissent = consensus.minority_dissent?.length ?? 0;
+
+  setText("consensus-p", `${pct}%`);
+  setText("consensus-team-label", `chance ${team} wins`);
+  setText("consensus-plain",
+    `${agents} specialist agents deliberated over 2 rounds. ` +
+    `We are 80% confident the true probability sits between ${lo}% and ${hi}%.`
   );
+
+  const dissentEl = document.getElementById("consensus-dissent");
+  if (dissent > 0) {
+    dissentEl.textContent = `${dissent} agent${dissent > 1 ? "s" : ""} disagreed strongly — see minority dissent in the panel above.`;
+    dissentEl.classList.remove("hidden");
+  } else {
+    dissentEl.classList.add("hidden");
+  }
 }
 
 function renderMarket(snapshot, spread) {
   show("market-display");
-  setText("market-p", `${(snapshot.market_probability * 100).toFixed(1)}%`);
-  setText("spread-label", `Spread: ${(spread * 100).toFixed(1)} pp`);
+  const mPct     = (snapshot.market_probability * 100).toFixed(1);
+  const spreadPp = (spread * 100).toFixed(1);
+  const team     = teamAName();
+  const dir      = snapshot.market_probability < window.selectedMatch?.team_a_p
+    ? "lower than" : "higher than";
+
+  setText("market-p", `${mPct}%`);
+  setText("spread-label",
+    `The crowd gives ${team} a ${mPct}% chance — ` +
+    `${spreadPp} percentage points away from SwarmCast's estimate.`
+  );
 }
 
 function renderEdge(edgeDetected, betReceipt) {

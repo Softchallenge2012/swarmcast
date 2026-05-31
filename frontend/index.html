@@ -111,14 +111,22 @@
     <section id="result-panel" class="hidden">
       <h2 class="section-label">Consensus</h2>
       <div id="consensus-display">
-        <span id="consensus-p" class="big-number">—</span>
-        <span id="consensus-ci" class="ci-label"></span>
+        <div class="consensus-hero">
+          <span id="consensus-p" class="big-number">—</span>
+          <span id="consensus-team-label" class="consensus-team"></span>
+        </div>
+        <p id="consensus-plain" class="consensus-plain"></p>
+        <p id="consensus-dissent" class="consensus-dissent hidden"></p>
       </div>
+
       <div id="market-display" class="hidden">
-        <h3>Market</h3>
-        <span id="market-p" class="big-number">—</span>
-        <span id="spread-label"></span>
+        <div class="consensus-hero">
+          <span id="market-p" class="big-number">—</span>
+          <span class="consensus-team">Polymarket</span>
+        </div>
+        <p id="spread-label" class="consensus-plain"></p>
       </div>
+
       <div id="edge-display" class="hidden">
         <div id="edge-badge"></div>
         <pre id="bet-receipt"></pre>
