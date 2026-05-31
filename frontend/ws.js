@@ -131,6 +131,9 @@ function renderConsensus(consensus) {
   }
 
   renderAggregateTable();
+
+  // Agent cards are now superseded by the aggregate table
+  hide("agent-feed");
 }
 
 function renderAggregateTable() {
