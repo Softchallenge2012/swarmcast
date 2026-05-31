@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     wandb_api_key: str
     wandb_project: str = "swarmcast"
 
+    # WC history API
+    wc_api_key: str = ""
+
     # Football data
     football_data_api_key: str = ""
     api_football_key: str = ""

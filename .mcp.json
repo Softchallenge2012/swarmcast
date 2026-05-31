@@ -3,6 +3,13 @@
     "wc26": {
       "command": "npx",
       "args": ["-y", "wc26-mcp"]
+    },
+    "wc": {
+      "command": "npx",
+      "args": ["-y", "@zafronix/wc-mcp"],
+      "env": {
+        "WC_API_KEY": "${wc_api_key}"
+      }
     }
   }
 }

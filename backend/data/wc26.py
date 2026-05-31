@@ -1,12 +1,18 @@
-"""WC26 MCP client — replaces static RAG + live API data with wc26-mcp tools.
+"""WC26 + WC-history MCP clients — replaces static RAG + live API data.
 
-Each _call() spins up `npx -y wc26-mcp`, sends an initialize + tools/call over
-stdin, and returns the text content.  Results are cached for the session (TTL 1h).
+Two MCP servers:
+  wc26-mcp             — WC2026 fixtures, teams, news, injuries, odds
+  @zafronix/wc-mcp    — Historical WC data 1930-2026 (matches, rosters, brackets)
+
+Each _call*() spins up the relevant npx server, sends initialize + tools/call
+over stdin, and returns the text content.  Results are cached 1h.
 """
 from __future__ import annotations
 import json
+import os
 import subprocess
 import time
+from ..config import settings
 
 _TTL = 3600
 _cache: dict[str, tuple[float, str]] = {}
@@ -44,6 +50,40 @@ def _call(tool: str, params: dict) -> str:
     return text
 
 
+def _call_history(tool: str, params: dict) -> str:
+    """Call a @zafronix/wc-mcp tool (historical WC data 1930-2026)."""
+    key = f"wc:{tool}:{json.dumps(params, sort_keys=True)}"
+    now = time.time()
+    if key in _cache and now - _cache[key][0] < _TTL:
+        return _cache[key][1]
+
+    stdin = (
+        json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                    "params": {"protocolVersion": "2024-11-05", "capabilities": {},
+                               "clientInfo": {"name": "swarmcast", "version": "1"}}}) + "\n" +
+        json.dumps({"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                    "params": {"name": tool, "arguments": params}}) + "\n"
+    )
+    env = {**os.environ, "WC_API_KEY": settings.wc_api_key}
+    proc = subprocess.run(
+        ["npx", "-y", "@zafronix/wc-mcp"],
+        input=stdin, capture_output=True, text=True, timeout=30, env=env,
+    )
+    text = ""
+    for line in proc.stdout.strip().splitlines():
+        try:
+            resp = json.loads(line)
+            if resp.get("id") == 2:
+                content = resp.get("result", {}).get("content", [])
+                text = "\n".join(c["text"] for c in content if c.get("type") == "text")
+                break
+        except Exception:
+            continue
+
+    _cache[key] = (now, text)
+    return text
+
+
 def build_context_bundle(
     team_a: str,
     team_b: str,
@@ -53,9 +93,11 @@ def build_context_bundle(
     profile_a  = _call("get_team_profile",       {"team": team_a})
     profile_b  = _call("get_team_profile",       {"team": team_b})
     compare    = _call("compare_teams",           {"team_a": team_a, "team_b": team_b})
-    h2h        = _call("get_historical_matchups", {"team_a": team_a, "team_b": team_b})
-    matches_a  = _call("get_matches",             {"team": team_a})
-    matches_b  = _call("get_matches",             {"team": team_b})
+    h2h          = _call("get_historical_matchups", {"team_a": team_a, "team_b": team_b})
+    hist_team_a  = _call_history("get_team",       {"name": team_a})
+    hist_team_b  = _call_history("get_team",       {"name": team_b})
+    matches_a    = _call("get_matches",            {"team": team_a})
+    matches_b    = _call("get_matches",            {"team": team_b})
     news_a     = _call("get_news",                {"team": team_a, "limit": 5})
     news_b     = _call("get_news",                {"team": team_b, "limit": 5})
     injuries_a = _call("get_injuries",            {"team": team_a})
@@ -68,7 +110,11 @@ def build_context_bundle(
             f"\n\n### {team_b}\n{profile_b}"
             f"\n\n## Head-to-Head Comparison\n{compare}"
         ),
-        "kaggle_history": h2h,
+        "kaggle_history": (
+            f"## WC2026 Head-to-Head\n{h2h}"
+            f"\n\n## Historical WC Record\n\n### {team_a}\n{hist_team_a}"
+            f"\n\n### {team_b}\n{hist_team_b}"
+        ),
         "live_form": (
             f"## Recent Matches\n\n### {team_a}\n{matches_a}"
             f"\n\n### {team_b}\n{matches_b}"
