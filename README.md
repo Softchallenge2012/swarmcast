@@ -1,113 +1,99 @@
 # SwarmCast
 
-SwarmCast is a multi-agent forecast application with a FastAPI backend and a browser-based frontend. The backend provides forecast and WebSocket endpoints, while the frontend uses a static HTML/CSS/JavaScript UI served by the backend.
+A self-improving multi-agent swarm for World Cup match forecasting, with Polymarket edge detection and automated bet placement.
+
+A pool of specialist agents deliberates in parallel on a match question. A holistic critic reads the full panel and identifies what the collective is missing. A Delphi round produces a confidence-weighted consensus probability. That probability is compared to the Polymarket implied price — if the spread exceeds 8 pp, SwarmCast places a limit order. Every Claude call is traced in W&B Weave and becomes a training sample for v2.
+
+---
 
 ## Requirements
 
-- Python 3.12
-- `pip` package manager
+- Python 3.9+
 - Node.js + `npx` (for MCP data servers)
+
+---
 
 ## Setup
 
-From the repository root:
-
 ```bash
-python3.12 -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Configure environment variables
+---
 
-The backend uses `pydantic-settings` and expects the following required values to be set before startup:
+## Environment variables
 
-- `ANTHROPIC_API_KEY`
-- `VOYAGE_API_KEY`
-- `WANDB_API_KEY`
-
-Optional values can also be provided in a `.env` file at the repo root.
-
-Example `.env` file:
+Create a `.env` file at the repo root:
 
 ```env
-ANTHROPIC_API_KEY=your-anthropic-key
-VOYAGE_API_KEY=your-voyage-key
-WANDB_API_KEY=your-wandb-key
+# Required
+ANTHROPIC_API_KEY=sk-ant-...
+WANDB_API_KEY=...
 WANDB_PROJECT=swarmcast
+
+# WC history MCP (@zafronix/wc-mcp)
+WC_API_KEY=...
+
+# Polymarket (validation layer only — never used during deliberation)
+POLYMARKET_PRIVATE_KEY=...   # Polygon wallet key for CLOB orders
 ```
 
-## RAG data requirement
+All other values are optional and have defaults in `backend/config.py`.
 
-The backend relies on a static RAG corpus for the `/forecast` pipeline.
-It expects the following files to exist:
+---
 
-- `backend/data/static/embeddings.npy`
-- `backend/data/static/metadata.json`
+## Data sources
 
-If these files are missing, forecast requests will fail with:
-`FileNotFoundError: backend/data/static/embeddings.npy`.
+Live match data is fetched at query time via two MCP servers — no static corpus, embeddings, or offline setup required:
 
-If you have a document corpus, you can generate the embeddings and metadata using the `embed_corpus()` helper in `backend/data/rag.py`.
-For example:
+| MCP | Provides |
+|-----|---------|
+| `wc26-mcp` | WC 2026 fixtures, team profiles, form, injuries, standings, H2H |
+| `@zafronix/wc-mcp` | Historical WC data 1930–2026 (matches, rosters, brackets) |
+
+Both servers are invoked automatically via `npx` on first use. Node.js must be installed.
+
+---
+
+## Run
 
 ```bash
-python - <<'PY'
-from backend.data.rag import embed_corpus
-# Replace this with your corpus documents
-corpus = [
-    {"text": "Example doc text.", "source": "source-name", "tags": ["example"]}
-]
-embed_corpus(corpus)
-PY
+uvicorn backend.main:app --reload --port 8000
 ```
 
-## Run the backend
+Open `http://localhost:8000`, enter two teams, and hit **Run SwarmCast**.
 
-The backend is the main application entrypoint and also serves frontend static files.
-
-Run this from the repository root:
-
-```bash
-uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-If you prefer to run it with Python directly:
-
-```bash
-python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-If you run from inside `backend/`, set the repository root on `PYTHONPATH`:
-
-```bash
-cd backend
-PYTHONPATH=.. uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
-```
-
-> Note: The backend mounts the `frontend` folder at `/static`, so the frontend is available from the same FastAPI server.
-
-## Open the frontend
-
-After starting the backend, open your browser at:
-
-```text
-http://localhost:8000/
-```
-
-This loads `frontend/index.html` and connects to the backend through the `/forecast` and `/ws` endpoints.
+---
 
 ## Project structure
 
-- `backend/` — FastAPI application and server code
-- `frontend/` — static UI files served by the backend
-- `requirements.txt` — Python dependencies
+```
+backend/
+  agents/         orchestrator, specialists, critic, delphi
+  data/           wc26.py (MCP client), live.py (fallback REST)
+  market/         gamma.py (Polymarket read), clob.py (order placement), edge.py
+  observability/  weave_tracer.py
+  main.py         FastAPI app — /forecast + /ws WebSocket
+  schemas.py      Pydantic models for the full pipeline
+  config.py       Settings (pydantic-settings, reads .env)
+frontend/
+  index.html      Match input + agent panel + consensus display
+  sketch.js       p5.js Boids — fish chaos → alignment → lock
+  ws.js           WebSocket client, drives phase transitions
+  style.css
+requirements/
+  SwarmCast.md    Full system spec
+```
 
-## Notes
+---
 
-- The frontend assets are served from `/static` by the FastAPI app.
-- The main API endpoints are:
-  - `GET /` — serve the frontend
-  - `GET /health` — health check
-  - `POST /forecast` — run a forecast request
-  - `GET /ws` — WebSocket event stream
+## API
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/` | Frontend |
+| `GET` | `/health` | Health check |
+| `POST` | `/forecast` | Run the full swarm pipeline |
+| `WS` | `/ws` | Real-time agent event stream |

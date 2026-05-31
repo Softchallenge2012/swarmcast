@@ -7,9 +7,6 @@ class Settings(BaseSettings):
     # Anthropic
     anthropic_api_key: str
 
-    # Voyage
-    voyage_api_key: str = ""
-
     # W&B Weave
     wandb_api_key: str
     wandb_project: str = "swarmcast"
@@ -33,8 +30,6 @@ class Settings(BaseSettings):
     orchestrator_model: str = "claude-sonnet-4-20250514"
     specialist_model: str = "claude-sonnet-4-20250514"
     critic_model: str = "claude-haiku-4-5-20251001"
-    embedding_model: str = "voyage-3"
-
     # Server
     host: str = "0.0.0.0"
     port: int = 8000
