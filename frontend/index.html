@@ -107,9 +107,24 @@
             <span id="score-team-b" class="score-team"></span>
           </div>
         </div>
-        <div class="consensus-hero" style="margin-top:0.75rem">
-          <span id="consensus-p" class="big-number">—</span>
-          <span id="consensus-team-label" class="consensus-team"></span>
+        <!-- Side-by-side probability comparison -->
+        <div class="prob-comparison" style="margin-top:0.75rem">
+          <div class="prob-col">
+            <span class="prob-col-label">SwarmCast</span>
+            <span id="consensus-p" class="big-number">—</span>
+            <span id="consensus-team-label" class="consensus-team"></span>
+          </div>
+          <div id="polymarket-col" class="prob-col hidden">
+            <span class="prob-col-label">Polymarket</span>
+            <span id="market-p-inline" class="big-number muted-num">—</span>
+            <span class="consensus-team">market implied</span>
+          </div>
+          <div id="spread-col" class="prob-col hidden">
+            <span class="prob-col-label">Edge</span>
+            <span id="spread-badge" class="spread-badge"
+                  title="">—</span>
+            <span id="edge-verdict" class="consensus-team"></span>
+          </div>
         </div>
         <p id="consensus-plain" class="consensus-plain"></p>
         <p id="consensus-dissent" class="consensus-dissent hidden"></p>

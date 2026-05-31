@@ -263,13 +263,32 @@ function renderWinnerOdds({ teams, h2h, favorites }) {
 }
 
 function renderMarket(snapshot, spread) {
-  show("market-display");
-  const mPct     = (snapshot.market_probability * 100).toFixed(1);
-  const spreadPp = (spread * 100).toFixed(1);
-  const team     = teamAName();
-  const dir      = snapshot.market_probability < window.selectedMatch?.team_a_p
-    ? "lower than" : "higher than";
+  const swarmPct  = parseFloat(document.getElementById("consensus-p")?.textContent) || 0;
+  const mPct      = (snapshot.market_probability * 100).toFixed(1);
+  const spreadPp  = (spread * 100).toFixed(1);
+  const team      = teamAName();
+  const threshold = 8.0;
 
+  // Inline comparison
+  setText("market-p-inline", `${mPct}%`);
+  show("polymarket-col");
+
+  const badge   = document.getElementById("spread-badge");
+  const verdict = document.getElementById("edge-verdict");
+  const isEdge  = parseFloat(spreadPp) >= threshold;
+  badge.textContent = `${spreadPp}pp`;
+  badge.className   = `spread-badge ${isEdge ? "edge" : "no-edge"}`;
+  badge.title = (
+    `Edge = |SwarmCast (${swarmPct}%) − Polymarket (${mPct}%)| = ${spreadPp}pp.\n` +
+    `Threshold: ${threshold}pp.\n` +
+    (isEdge
+      ? `Above threshold — SwarmCast places a limit order.`
+      : `Below threshold — no bet placed.`)
+  );
+  verdict.textContent = isEdge ? "bet placed" : "no bet";
+  show("spread-col");
+
+  // Keep legacy market-display in sync (hidden but used elsewhere)
   setText("market-p", `${mPct}%`);
   setText("spread-label",
     `The crowd gives ${team} a ${mPct}% chance — ` +
@@ -280,8 +299,10 @@ function renderMarket(snapshot, spread) {
 function renderEdge(edgeDetected, betReceipt) {
   show("edge-display");
   const badge = document.getElementById("edge-badge");
-  badge.className = `edge-badge ${edgeDetected ? "edge" : "no-edge"}`;
-  badge.textContent = edgeDetected ? "EDGE DETECTED — order placed" : "No edge — threshold not met";
+  if (badge) {
+    badge.className = `edge-badge ${edgeDetected ? "edge" : "no-edge"}`;
+    badge.textContent = edgeDetected ? "EDGE DETECTED — order placed" : "No edge — threshold not met";
+  }
   if (betReceipt) {
     document.getElementById("bet-receipt").textContent = JSON.stringify(betReceipt, null, 2);
   }
