@@ -33,14 +33,14 @@ def find_wc_market(team_a: str, team_b: str) -> str | None:
     with httpx.Client(timeout=10) as c:
         r = c.get(
             f"{_GAMMA_BASE}/markets",
-            params={"active": "true", "tag_id": "football", "limit": 100},
+            params={"active": "true", "q": f"{team_a} {team_b}", "limit": 50},
         )
         r.raise_for_status()
         markets = r.json()
 
-    query = f"{team_a} {team_b}".lower()
+    a, b = team_a.lower(), team_b.lower()
     for m in markets:
         title = m.get("question", "").lower()
-        if team_a.lower() in title and team_b.lower() in title:
+        if a in title and b in title:
             return m["id"]
     return None

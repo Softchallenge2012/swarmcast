@@ -4,14 +4,17 @@ SwarmCast is a multi-agent forecast application with a FastAPI backend and a bro
 
 ## Requirements
 
-- Python 3.11+ recommended
+- Python 3.12
 - `pip` package manager
+- Node.js + `npx` (for MCP data servers)
 
-## Install dependencies
+## Setup
 
 From the repository root:
 
 ```bash
+python3.12 -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
