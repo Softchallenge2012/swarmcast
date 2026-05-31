@@ -152,7 +152,9 @@ function renderConsensus(consensus) {
   dissentEl.textContent = ciText;
   dissentEl.classList.remove("hidden");
 
+  show("bar-chart");
   renderAggregateTable();
+  hide("agent-feed");
 }
 
 function renderAggregateTable() {
