@@ -153,13 +153,17 @@ The meta-orchestrator is prompted to return a JSON array of specialist definitio
 | `areezvisram12/wc2026-match-data` (Kaggle, SQLite) | 2026 schedule, venues, groups, confirmed squads. | Orchestrator |
 | StatsBomb Open Data (GitHub, free) | Event-level xG, passes, pressures. WC 2018 + 2022. Tactical fingerprints. | Tactical analyst |
 
-### Live — fetch at query time
+### Live — fetch at query time via MCP
 
-| Source | Provides | Feeds |
-|--------|----------|-------|
-| `football-data.org` (free, API key) | Fixtures, standings, squad lists, last 5 results. 10 req/min. | Form + squad |
-| Transfermarkt (transfermarkt-scraper) | Injuries, suspensions, squad depth. Only free source for current injury status. | Squad fitness |
-| API-Football (free, 100 req/day) | H2H records, lineups, coach stats. Backup H2H source. | Historical stats |
+Live data is accessed through MCP (Model Context Protocol) servers. This lets the Anthropic SDK call tools directly against live sources — no custom HTTP client code, no scraper maintenance, structured responses out of the box.
+
+| MCP Server | Provides | Feeds |
+|------------|----------|-------|
+| **Transfermarkt MCP** | Injuries, suspensions, squad depth, market values, transfer news. Real-time squad fitness data. | Squad fitness agent |
+| **wc26-mcp** | WC 2026 schedule, group standings, match venues, confirmed squads, results as they happen. | Tournament context agent · Orchestrator |
+| `football-data.org` (REST, API key) | Last 5 results, fixtures, squad lists. Fallback if MCP unavailable. | Form agent |
+
+> MCP servers are registered with the Anthropic client at startup. Agent prompts call MCP tools the same way they call any other tool — the orchestrator passes the relevant tool list per specialist based on `data_slice_id`.
 
 ### Validation only — fetched after vote is sealed
 
@@ -185,7 +189,8 @@ Embed the static corpus (~500 docs) with Voyage-3 tonight. Save as numpy array +
 | Backend | FastAPI + WebSockets |
 | Visualization | p5.js Boids (OpenProcessing starter) |
 | Observability | W&B Weave — every Anthropic API call traced |
-| Data fetching | httpx (async), cached for demo duration |
+| Live data | Transfermarkt MCP + wc26-mcp (Model Context Protocol servers) |
+| Data fetching | httpx (async, fallback), cached for demo duration |
 | Betting | `py-clob-client` (Polymarket Python SDK), Polygon wallet |
 | Deployment | CoreWeave VM + ngrok |
 
