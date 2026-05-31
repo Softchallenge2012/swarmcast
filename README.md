@@ -23,7 +23,7 @@ https://wandb.ai/{WANDB_ENTITY}/{WANDB_PROJECT}/weave
 ## Setup
 
 ```bash
-python3 -m venv .venv
+python3.11 -m venv .venv311
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # set WANDB_API_KEY, WC_API_KEY as needed
