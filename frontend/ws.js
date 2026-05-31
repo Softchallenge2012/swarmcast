@@ -287,7 +287,7 @@ function renderWinnerOdds({ teams, h2h, favorites }) {
 function renderMarket(snapshot, spread) {
   const isDerived = snapshot.market_id === "winner_odds_derived";
   // Update Polymarket column sublabel
-  const lbl = document.querySelector("#polymarket-col .prob-col-label, .prob-col:nth-child(3) .prob-col-label");
+  const lbl = document.getElementById("market-source-label");
   if (lbl) lbl.textContent = isDerived ? "Polymarket (H2H)" : "Polymarket";
 
   const swarmPct  = parseFloat(document.getElementById("consensus-p")?.textContent) || 0;
