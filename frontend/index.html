@@ -61,16 +61,15 @@
       </div>
     </section>
 
-    <!-- ── Step 2: Match picker (bracket) ────────────────────────────────── -->
+    <!-- ── Step 2: Match picker ───────────────────────────────────────────── -->
     <section id="bracket-section">
       <h2 class="section-label">Step 2 — Pick a match</h2>
       <div id="group-grid"></div>
-
       <h2 class="section-label knockout-label">Knockout Stage</h2>
       <div id="knockout-bracket"></div>
     </section>
 
-    <!-- ── Sticky run bar (appears when match selected) ───────────────────── -->
+    <!-- ── Sticky run bar ─────────────────────────────────────────────────── -->
     <div id="run-bar" class="hidden">
       <div class="run-bar-summary">
         <span class="run-bar-q" id="run-bar-question-label"></span>
@@ -92,22 +91,7 @@
       </div>
     </section>
 
-    <!-- ── Live agent feed ────────────────────────────────────────────────── -->
-    <section id="agent-feed" class="hidden">
-      <h2 class="section-label">Agent Panel</h2>
-      <div id="agent-cards"></div>
-      <div id="bar-chart"><div id="bars"></div></div>
-    </section>
-
-    <!-- ── Critic ─────────────────────────────────────────────────────────── -->
-    <section id="critic-panel" class="hidden">
-      <h2 class="section-label">Holistic Critic</h2>
-      <div id="critic-gaps"></div>
-      <div id="critic-groupthink"></div>
-      <div id="critic-actions"></div>
-    </section>
-
-    <!-- ── Consensus + market ─────────────────────────────────────────────── -->
+    <!-- ── Consensus + market  (directly below fish) ──────────────────────── -->
     <section id="result-panel" class="hidden">
       <h2 class="section-label">Consensus</h2>
       <div id="consensus-display">
@@ -131,6 +115,38 @@
         <div id="edge-badge"></div>
         <pre id="bet-receipt"></pre>
       </div>
+
+      <!-- Final aggregate table — all agents at a glance -->
+      <div id="aggregate-table-wrap" class="hidden">
+        <h3 class="section-label" style="margin-top:1.5rem">Final Vote — All Agents</h3>
+        <table id="aggregate-table">
+          <thead>
+            <tr>
+              <th>Agent</th>
+              <th>Round 1</th>
+              <th>Round 2</th>
+              <th>Key signal</th>
+              <th>Reasoning</th>
+            </tr>
+          </thead>
+          <tbody id="aggregate-rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── Live agent cards (detail, appears during deliberation) ─────────── -->
+    <section id="agent-feed" class="hidden">
+      <h2 class="section-label">Agent Panel</h2>
+      <div id="agent-cards"></div>
+      <div id="bar-chart"><div id="bars"></div></div>
+    </section>
+
+    <!-- ── Critic ─────────────────────────────────────────────────────────── -->
+    <section id="critic-panel" class="hidden">
+      <h2 class="section-label">Holistic Critic</h2>
+      <div id="critic-gaps"></div>
+      <div id="critic-groupthink"></div>
+      <div id="critic-actions"></div>
     </section>
 
   </main>
