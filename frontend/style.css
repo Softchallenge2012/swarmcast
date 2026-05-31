@@ -307,6 +307,42 @@ button#run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .big-number { font-size: 3.5rem; font-weight: 800; }
 .ci-label   { font-size: 0.85rem; color: var(--muted); }
 
+/* ── Probability comparison row ──────────────────────────────────────────── */
+
+.prob-comparison {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.prob-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.prob-col-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+.muted-num { color: var(--muted); }
+
+.spread-badge {
+  display: inline-block;
+  font-size: 2.2rem;
+  font-weight: 800;
+  cursor: help;
+  border-bottom: 2px dashed currentColor;
+}
+.spread-badge.edge    { color: var(--green); }
+.spread-badge.no-edge { color: var(--muted); }
+
+.score-block { margin-bottom: 0.25rem; }
+.score-sublabel { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); display: block; margin-bottom: 0.3rem; }
+.score-row { display: flex; align-items: center; gap: 0.75rem; }
+.score-team { font-size: 1rem; font-weight: 600; color: var(--muted); }
+
 .consensus-hero {
   display: flex;
   align-items: baseline;

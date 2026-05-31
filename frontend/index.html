@@ -99,10 +99,32 @@
 
       <!-- Swarm probability + verdict -->
       <div id="consensus-display">
-        <div class="consensus-hero">
-          <span id="consensus-score" class="big-number score-line">—</span>
-          <span id="consensus-p" class="big-number">—</span>
-          <span id="consensus-team-label" class="consensus-team"></span>
+        <div class="score-block">
+          <span class="score-sublabel">Predicted score</span>
+          <div class="score-row">
+            <span id="score-team-a" class="score-team"></span>
+            <span id="consensus-score" class="big-number score-line">—</span>
+            <span id="score-team-b" class="score-team"></span>
+          </div>
+        </div>
+        <!-- Side-by-side probability comparison -->
+        <div class="prob-comparison" style="margin-top:0.75rem">
+          <div class="prob-col">
+            <span class="prob-col-label">SwarmCast</span>
+            <span id="consensus-p" class="big-number">—</span>
+            <span id="consensus-team-label" class="consensus-team"></span>
+          </div>
+          <div id="polymarket-col" class="prob-col hidden">
+            <span class="prob-col-label">Polymarket</span>
+            <span id="market-p-inline" class="big-number muted-num">—</span>
+            <span class="consensus-team">market implied</span>
+          </div>
+          <div id="spread-col" class="prob-col hidden">
+            <span class="prob-col-label">Edge</span>
+            <span id="spread-badge" class="spread-badge"
+                  title="">—</span>
+            <span id="edge-verdict" class="consensus-team"></span>
+          </div>
         </div>
         <p id="consensus-plain" class="consensus-plain"></p>
         <p id="consensus-dissent" class="consensus-dissent hidden"></p>
@@ -117,7 +139,7 @@
         <table id="aggregate-table">
           <thead>
             <tr>
-              <th>Agent</th><th>Focus</th><th>Round 1</th><th>Round 2</th>
+              <th>Agent</th><th>Round 1</th><th>Round 2</th>
               <th>Key signal</th><th>Reasoning</th>
             </tr>
           </thead>
