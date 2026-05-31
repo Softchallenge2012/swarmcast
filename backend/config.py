@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str
 
     # Voyage
-    voyage_api_key: str
+    voyage_api_key: str = ""
 
     # W&B Weave
     wandb_api_key: str
