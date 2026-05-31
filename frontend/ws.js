@@ -53,7 +53,6 @@ function teamAName() {
 const votesByRole = {};   // role → { r1: AgentVote, r2: AgentVote }
 
 function addAgentCard(vote) {
-  // Track votes for final aggregate table
   if (!votesByRole[vote.role]) votesByRole[vote.role] = {};
   votesByRole[vote.role][`r${vote.round}`] = vote;
 
@@ -61,19 +60,39 @@ function addAgentCard(vote) {
   const existing  = document.getElementById(`card-${vote.role}`);
   const card      = existing || document.createElement("div");
   const color     = agentColor(vote.role);
-  card.id         = `card-${vote.role}`;
-  card.className  = `agent-card${vote.round === 2 ? " round2" : ""}`;
+  const r1        = votesByRole[vote.role].r1;
+  const r2        = votesByRole[vote.role].r2;
+
+  card.id    = `card-${vote.role}`;
+  card.className = "agent-card";
   card.style.borderLeftColor = color;
-  card.innerHTML  = `
-    <div class="role" style="color:${color}">${vote.role.replace(/_/g, " ")} · round ${vote.round}</div>
-    <div class="score">${vote.team_a_goals}–${vote.team_b_goals}</div>
-    <div class="prob">${(vote.probability * 100).toFixed(1)}%
+
+  const r1Row = r1 ? `
+    <div class="round-row">
+      <span class="round-tag">R1</span>
+      <span class="round-pct">${(r1.probability * 100).toFixed(1)}%</span>
       <span class="prob-label">P(${teamAName()} wins)</span>
-    </div>
-    <div class="signal"><strong>Key signal:</strong> ${vote.key_signal}</div>
-    <div class="reasoning">${vote.reasoning}</div>
-    ${vote.uncertainty_flag ? '<div class="flag">⚠ Low data confidence</div>' : ""}
+    </div>` : "";
+
+  const r2Row = r2 ? `
+    <div class="round-row round2-row">
+      <span class="round-tag r2">R2</span>
+      <span class="round-pct">${(r2.probability * 100).toFixed(1)}%</span>
+      <span class="prob-label">P(${teamAName()} wins)</span>
+      ${r1 ? `<span class="delta ${r2.probability >= r1.probability ? "up" : "dn"}">
+        ${r2.probability >= r1.probability ? "+" : ""}${((r2.probability - r1.probability) * 100).toFixed(1)}pp
+      </span>` : ""}
+    </div>` : "";
+
+  const latest = r2 || r1;
+  card.innerHTML = `
+    <div class="role" style="color:${color}">${vote.role.replace(/_/g, " ")}</div>
+    ${r1Row}${r2Row}
+    <div class="signal"><strong>Key signal:</strong> ${latest.key_signal}</div>
+    <div class="reasoning">${latest.reasoning}</div>
+    ${latest.uncertainty_flag ? '<div class="flag">⚠ Low data confidence</div>' : ""}
   `;
+
   if (!existing) container.appendChild(card);
   updateBarChart(vote, color);
   window.pulseRole?.(vote.role);
@@ -133,9 +152,6 @@ function renderConsensus(consensus) {
   dissentEl.classList.remove("hidden");
 
   renderAggregateTable();
-
-  // Cards are redundant once the aggregate table is up — remove them
-  document.getElementById("agent-cards").innerHTML = "";
 }
 
 function renderAggregateTable() {
