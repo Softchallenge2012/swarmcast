@@ -371,9 +371,11 @@ button#run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   width: 100%;
 }
 .consensus-dissent {
-  font-size: 0.82rem;
+  font-size: 1.1rem;
+  font-weight: 500;
   color: var(--red);
   line-height: 1.5;
+  margin-top: 0.5rem;
 }
 
 #market-display { margin-top: 1.5rem; }
