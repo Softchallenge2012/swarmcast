@@ -209,6 +209,7 @@ document.getElementById("run-btn").addEventListener("click", async () => {
   show("viz-panel");
   show("agent-feed");
   window.setSwarmPhase?.("deliberating");
+  document.getElementById("viz-panel").scrollIntoView({ behavior: "smooth", block: "start" });
 
   const body = {
     match_query: matchQuery,
